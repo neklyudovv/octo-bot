@@ -3,12 +3,55 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.handlers import CallbackQueryHandler
 
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+
 from engine.parser import data
 import engine.keyboards as kb
 
+from engine.docs import main as main_docs
+
 router = Router()
 
-@router.message(CommandStart()) #/start
+
+class Form(StatesGroup):
+    text = State()
+
+
+# "Другое"
+@router.callback_query(F.data == 'other')
+async def other_start(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(Form.text)
+    await callback.message.edit_text(data['other_message'], reply_markup=kb.back_kb.as_markup())
+
+
+@router.message(Form.text)
+async def process_other(message: Message, state: FSMContext):
+    await state.update_data(text=message.text)
+    other_data = await state.get_data()
+    await state.clear()
+    await send_other(message, other_data=other_data)
+
+
+@router.callback_query(F.data == 'other_back')
+async def cancel_other(callback: CallbackQuery, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        await callback.message.edit_text(data["greeting_message2"], reply_markup=await kb.menu())
+        return
+    await state.clear()
+    await callback.message.edit_text(data["greeting_message2"], reply_markup=await kb.menu())
+
+
+async def send_other(message: Message, other_data):
+    text = other_data['text']
+    # if await docs.add(text):
+    main_docs(text)
+    await message.answer('мы поулчили ' + text)
+    # else 4eto ne tak
+
+
+@router.message(CommandStart()) # /start
 async def command_start_handler(message: Message):
     await message.answer(data["greeting_message"], reply_markup=kb.greet_kb.as_markup())#await menu())
 
@@ -26,8 +69,10 @@ class MyHandler(CallbackQueryHandler):
         if user_choice == 'home': # inline на главную
             await self.message.edit_text(data["greeting_message2"], reply_markup=await kb.menu())
 
-        if user_choice == 'other':
-            await self.message.edit_text(data['other_message'], reply_markup=kb.back_kb.as_markup())
+        #if user_choice == 'other':
+        #    await other_start(Message, FSMContext)
+        #    await state.set_state(Form.name)
+        #    await self.message.edit_text(data['other_message'], reply_markup=kb.back_kb.as_markup())
 
         if user_choice.count("_") == 0:
             for i, button in enumerate(data['menu']): #inline category
@@ -38,9 +83,6 @@ class MyHandler(CallbackQueryHandler):
                 for j, buttn in enumerate(data['menu'][button]):
                     if user_choice == str(i) + "_" + str(j):
                         await self.message.edit_text(str(data['menu'][button][buttn]), reply_markup=kb.other_kb.as_markup())
-       # else:
-        #    for i, button in enumerate(data['menu']):
-
 
 
         #for i in data['menu']: # inline категория

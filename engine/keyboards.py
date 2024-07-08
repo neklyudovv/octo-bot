@@ -11,7 +11,7 @@ other_kb.add(InlineKeyboardButton(text='Другое', callback_data='other'))
 other_kb.add(InlineKeyboardButton(text='На главную', callback_data='home'))
 
 back_kb = InlineKeyboardBuilder()
-back_kb.add(InlineKeyboardButton(text='Назад', callback_data='home'))
+back_kb.add(InlineKeyboardButton(text='Назад', callback_data='other_back'))
 
 async def menu():
     keyboard = InlineKeyboardBuilder()
