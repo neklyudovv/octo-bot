@@ -1,11 +1,12 @@
 from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
 
 def authenticate():
     SCOPES = ['https://www.googleapis.com/auth/documents', 'https://www.googleapis.com/auth/drive']
     credentials = service_account.Credentials.from_service_account_file('credentials.json', scopes=SCOPES)
     return credentials
 
-from googleapiclient.discovery import build
 
 def create_service():
     credentials = authenticate()
@@ -18,7 +19,7 @@ def create_document(title):
     document = service.documents().create(body={'title': title}).execute()
     document_id = document['documentId']
     grant_permission(document_id)
-    print(f'Создан новый документ с ID: {document_id}')
+    # print(f'Создан новый документ с ID: {document_id}')
     return document_id
 
 
@@ -29,18 +30,6 @@ def grant_permission(document_id):
         'role': 'writer',
     }
     service.permissions().create(fileId=document_id, body=permission2).execute()
-
-
-def get_document_content(document_id):
-    service = create_service()
-
-    document = service.documents().get(documentId=document_id).execute()
-    title = document['title']
-    content = document['body']['content']
-
-    print(f'Заголовок документа: {title}')
-    print('Содержимое документа:')
-    print(content)
 
 
 def insert_text(document_id, text):
@@ -62,8 +51,6 @@ def insert_text(document_id, text):
     print('Текст успешно вставлен в документ')
 
 
-
 def main(text):
     document_id = '1l-AeWtEOMdBAwWhX31SjHxPk6gYoZ9h5wBCS6O3FyWw'
-    get_document_content(document_id)
-    insert_text(document_id, text+'\n\n')
+    insert_text(document_id, text + '\n\n----------------\n')
