@@ -30,6 +30,24 @@ async def other_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(data['other_message'], reply_markup=kb.back_kb.as_markup())
 
 
+@router.message(F.video)
+async def handle_attachments(message: Message, state: FSMContext):
+    current_state = await state.get_state()
+
+    vid = message.video.file_name
+    rr = str(randint(1, 9999999))
+    file_name = 'downloads/' + rr + vid[vid.find('.')::]
+    await message.bot.download(file=message.video.file_id, destination=file_name)
+    file_id = main_att(rr + vid[vid.find('.')::], file_name, message.video.mime_type)
+    main_docs('https://drive.google.com/file/d/' + file_id + '/view')
+
+    if current_state is not None:
+        if message.caption is not None:
+            await state.update_data(text=message.caption)
+            other_data = await state.get_data()
+            await state.clear()
+            await send_other(message, other_data=other_data)
+
 @router.message(F.photo)
 async def handle_attachments(message: Message, state: FSMContext):
     current_state = await state.get_state()
@@ -37,14 +55,16 @@ async def handle_attachments(message: Message, state: FSMContext):
     rr = str(randint(1, 9999999))
     file_name = 'downloads/' + rr + '.jpg'
     await message.bot.download(file=message.photo[-1].file_id, destination=file_name)
-    file_id = main_att(rr + '.jpg', file_name)
+    print(message.photo[-1])
+    file_id = main_att(rr + '.jpg', file_name, 'image/jpeg')
     main_docs('https://drive.google.com/file/d/' + file_id + '/view')
 
     if current_state is not None:
-        await state.update_data(text=message.caption)
-        other_data = await state.get_data()
-        await state.clear()
-        await send_other(message, other_data=other_data)
+        if message.caption is not None:
+            await state.update_data(text=message.caption)
+            other_data = await state.get_data()
+            await state.clear()
+            await send_other(message, other_data=other_data)
 
 
 @router.message(F.text, Form.text)
