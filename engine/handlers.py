@@ -15,7 +15,6 @@ from engine.docs import main as main_docs
 
 from engine.attachments import main as main_att
 
-
 router = Router()
 
 
@@ -30,41 +29,36 @@ async def other_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(data['other_message'], reply_markup=kb.back_kb.as_markup())
 
 
-@router.message(F.video)
-async def handle_attachments(message: Message, state: FSMContext):
+async def handle_attachments(message: Message, state: FSMContext, attachment_type: str):
     current_state = await state.get_state()
+    if attachment_type == 'video':
+        video = message.video.file_name
+        video_name = str(randint(1, 9999999))
+        file_name = 'downloads/' + video_name + video[video.find('.')::]
+        await message.bot.download(file=message.video.file_id, destination=file_name)
+        file_id = main_att(video_name + video[video.find('.')::], file_name, message.video.mime_type)
+    else:
+        image_name = str(randint(1, 9999999))
+        file_name = 'downloads/' + image_name + '.jpg'
+        await message.bot.download(file=message.photo[-1].file_id, destination=file_name)
+        file_id = main_att(image_name + '.jpg', file_name, 'image/jpeg')
 
-    vid = message.video.file_name
-    rr = str(randint(1, 9999999))
-    file_name = 'downloads/' + rr + vid[vid.find('.')::]
-    await message.bot.download(file=message.video.file_id, destination=file_name)
-    file_id = main_att(rr + vid[vid.find('.')::], file_name, message.video.mime_type)
     main_docs('https://drive.google.com/file/d/' + file_id + '/view')
+    if current_state and message.caption:
+        await state.update_data(text=message.caption)
+        other_data = await state.get_data()
+        await state.clear()
+        await send_other(message, other_data=other_data)
 
-    if current_state is not None:
-        if message.caption is not None:
-            await state.update_data(text=message.caption)
-            other_data = await state.get_data()
-            await state.clear()
-            await send_other(message, other_data=other_data)
+
+@router.message(F.video)
+async def handle_video(message: Message, state: FSMContext):
+    await handle_attachments(message, state, 'video')
+
 
 @router.message(F.photo)
-async def handle_attachments(message: Message, state: FSMContext):
-    current_state = await state.get_state()
-
-    rr = str(randint(1, 9999999))
-    file_name = 'downloads/' + rr + '.jpg'
-    await message.bot.download(file=message.photo[-1].file_id, destination=file_name)
-    print(message.photo[-1])
-    file_id = main_att(rr + '.jpg', file_name, 'image/jpeg')
-    main_docs('https://drive.google.com/file/d/' + file_id + '/view')
-
-    if current_state is not None:
-        if message.caption is not None:
-            await state.update_data(text=message.caption)
-            other_data = await state.get_data()
-            await state.clear()
-            await send_other(message, other_data=other_data)
+async def handle_photo(message: Message, state: FSMContext):
+    await handle_attachments(message, state, 'photo')
 
 
 @router.message(F.text, Form.text)
@@ -113,12 +107,13 @@ class MyHandler(CallbackQueryHandler):
             await self.message.edit_text(data["greeting_message2"], reply_markup=await kb.menu())
 
         if user_choice.count("_") == 0:
-            for i, button in enumerate(data['menu']):  # inline category
+            for i, topic_button in enumerate(data['menu']):  # inline category
                 if user_choice == str(i):
-                    await self.message.edit_text(str(button).upper(), reply_markup=await kb.keyboard(i, button))
+                    await self.message.edit_text(str(topic_button).upper(),
+                                                 reply_markup=await kb.keyboard(i, topic_button))
         else:
-            for i, button in enumerate(data['menu']):
-                for j, buttn in enumerate(data['menu'][button]):
+            for i, topic_button in enumerate(data['menu']):
+                for j, question_button in enumerate(data['menu'][topic_button]):  # inline кнопка в категории
                     if user_choice == str(i) + "_" + str(j):
-                        await self.message.edit_text(str(data['menu'][button][buttn]),
+                        await self.message.edit_text(str(data['menu'][topic_button][question_button]),
                                                      reply_markup=kb.other_kb.as_markup())

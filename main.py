@@ -11,6 +11,7 @@ from aiogram.enums import ParseMode
 
 dp = Dispatcher()
 
+
 async def main() -> None:
     dp.include_router(router)
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

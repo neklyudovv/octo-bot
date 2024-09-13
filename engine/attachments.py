@@ -15,10 +15,10 @@ def create_service():
     return service
 
 
-def create_document(title, image, mimetype):
+def create_document(title, file, mimetype):
     service = create_service()
     file_metadata = {'name': str(title)}
-    media = MediaFileUpload(image,
+    media = MediaFileUpload(file,
                             mimetype=mimetype) # todo: video, gif
 
     file = service.files().create(body=file_metadata, media_body=media,
@@ -35,7 +35,7 @@ def grant_permission(document_id):
     service.permissions().create(fileId=document_id, body=permission2).execute()
 
 
-def main(title, image, mimetype):
-    file_id = create_document(title, image, mimetype)
+def main(title, file, mimetype):
+    file_id = create_document(title, file, mimetype)
     grant_permission(file_id)
     return str(file_id)
