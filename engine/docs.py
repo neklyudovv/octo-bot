@@ -1,5 +1,6 @@
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from config import document_id
 
 
 def authenticate():
@@ -52,5 +53,5 @@ def insert_text(document_id, text):
 
 
 def main(text):
-    document_id = '1l-AeWtEOMdBAwWhX31SjHxPk6gYoZ9h5wBCS6O3FyWw'
+    # чтобы вставлять текст в нужный документ
     insert_text(document_id, text + '\n\n----------------\n')
