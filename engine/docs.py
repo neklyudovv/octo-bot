@@ -1,6 +1,7 @@
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from config import document_id
+from os import environ
+from dotenv import load_dotenv
 
 
 def authenticate():
@@ -54,4 +55,6 @@ def insert_text(document_id, text):
 
 def main(text):
     # чтобы вставлять текст в нужный документ
+    load_dotenv()
+    document_id = environ['document_id']
     insert_text(document_id, text + '\n\n----------------\n')

@@ -2,7 +2,8 @@ import asyncio
 import logging
 import sys
 
-from config import TOKEN
+from dotenv import load_dotenv
+from os import environ
 from engine.handlers import router
 
 from aiogram import Bot, Dispatcher, html
@@ -14,7 +15,9 @@ dp = Dispatcher()
 
 async def main() -> None:
     dp.include_router(router)
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    load_dotenv()
+    token = environ['TOKEN']
+    bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await dp.start_polling(bot)
 
 
