@@ -1,0 +1,8 @@
+{
+    "apps": [
+        {
+            "name": "rguk-bot",
+            "script": "./deploy.sh"
+        }
+    ]
+}
