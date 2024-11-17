@@ -2,7 +2,7 @@
     "apps": [
         {
             "name": "rguk-bot",
-            "script": "./deploy.sh"
+            "script": "./deploy/deploy.sh"
         }
     ]
 }

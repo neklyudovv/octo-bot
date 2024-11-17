@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd ../
-
 # Устанавливаем зависимостей
 pip install python-dotenv
 pip install aiogram
