@@ -6,4 +6,4 @@ pip install aiogram
 pip install google-api-python-client
 
 # Запускаем основной скрипт
-python3 main.py
+python3 ../main.py
