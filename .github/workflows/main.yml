@@ -24,3 +24,14 @@ jobs:
           overwrite: true
           source: ./*
           target: ${{ secrets.DESTINATION_FOLDER }}
+
+      - name: Build and Deploy app in PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ${{ secrets.DESTINATION_FOLDER }}
+            
+            pm2 reload rguk-bot
